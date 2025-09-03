@@ -62,7 +62,7 @@
        # 注释掉 build 部分
        # build: .
        # 使用云仓库镜像
-       image: docker.io/3651809/moyu-web:latest
+       image: 3651809/moyu-web:latest
    # 或者简化为 (Docker Hub 是默认仓库)
    # image: 3651809/moyu-web:latest
        container_name: moyu-web
@@ -82,9 +82,7 @@
 
 1. 拉取镜像：
    ```bash
-   docker pull docker.io/3651809/moyu-web:latest
-   # 或者简化为
-   # docker pull 3651809/moyu-web:latest
+   docker pull 3651809/moyu-web:latest
    ```
 
 2. 运行容器：

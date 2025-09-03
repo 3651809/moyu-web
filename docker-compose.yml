@@ -2,7 +2,7 @@ version: "3.9"
 services:
   moyu-web:
     build: .
-    image: moyu-web:latest
+    image: 3651809/moyu-web:latest
     container_name: moyu-web
     ports:
       - "3636:3636"
