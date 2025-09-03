@@ -96,6 +96,7 @@ cp .env.example .env
 
 ```bash
 git clone '代码地址'
+修改.env 配置
 docker-compose up -d --build
 ```
 
@@ -135,7 +136,7 @@ npm run dev
 ### 生产环境
 1. 使用Docker Compose（单容器部署）
 ```bash
-git clone '代码地址'
+修改docker-compose中.env配置文件路径
 docker-compose up -d --build
 ```
 
