@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>摸鱼资讯 - 今日摸鱼指数</title>
+  <!-- 引入Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <!-- 配置Tailwind自定义颜色和字体 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#4F46E5', // 主色调：紫色
+            secondary: '#EC4899', // 辅助色：粉色
+            neutral: '#1F2937', // 中性色：深灰色
+            light: '#F9FAFB', // 浅色背景
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  <!-- 自定义工具类 -->
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .glass-effect {
+        backdrop-filter: blur(8px);
+        background-color: rgba(255, 255, 255, 0.7);
+        transition: all 0.3s ease;
+      }
+      .glass-effect:hover {
+        background-color: rgba(255, 255, 255, 0.85);
+      }
+      .card-hover {
+        transition: all 0.3s ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      }
+      .progress-ring {
+        transform: rotate(-90deg);
+      }
+      .pulse-slow {
+        animation: pulse-slow 4s infinite;
+      }
+      .slide-up {
+        animation: slide-up 0.5s ease-out;
+      }
+      .fade-in {
+        animation: fade-in 0.5s ease-out;
+      }
+      .skeleton-loading {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+      }
+      .gradient-text {
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        background-image: linear-gradient(to right, #4F46E5, #EC4899);
+      }
+      .dashboard-card {
+        position: relative;
+        overflow: hidden;
+      }
+      .dashboard-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(79, 70, 229, 0.05) 0%, transparent 70%);
+        transform: scale(0);
+        transition: transform 0.5s ease;
+        z-index: 0;
+      }
+      .dashboard-card:hover::before {
+        transform: scale(1);
+      }
+    }
+  </style>
+  <style>
+    body {
+      background-image: url('https://picsum.photos/id/1002/1920/1080');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      overflow-x: hidden;
+    }
+    .news-item {
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+    .news-item:hover {
+      background-color: rgba(255, 255, 255, 0.9);
+      transform: translateX(5px);
+    }
+    .countdown {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    @keyframes pulse-slow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    @keyframes fade-in {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    @keyframes slide-up {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .dashboard-value {
+      transition: all 0.3s ease;
+    }
+    .dashboard-value:hover {
+      transform: scale(1.05);
+    }
+    /* 精致滚动条样式 - 适配现代网站设计 */
+    /* Webkit 浏览器 (Chrome, Safari, Edge) */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(243, 244, 246, 0.6);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(79, 70, 229, 0.4);
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(79, 70, 229, 0.7);
+      transform: scale(1.05);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    }
+    ::-webkit-scrollbar-thumb:active {
+      background: rgba(79, 70, 229, 0.9);
+      transform: scale(1);
+    }
+    
+    /* Firefox 滚动条样式 */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(79, 70, 229, 0.4) rgba(243, 244, 246, 0.6);
+    }
+  </style>
+</head>
+<body class="min-h-screen font-sans text-neutral">
+  <!-- 导航栏 -->
+  <nav class="sticky top-0 z-50 glass-effect border-b border-gray-200 shadow-sm">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <i class="fa fa-coffee text-primary text-2xl"></i>
+        <span class="text-xl font-bold text-primary">摸鱼资讯</span>
+      </div>
+      <div id="current-time" class="text-lg font-medium"></div>
+    </div>
+  </nav>
+
+  <!-- 主内容区 -->
+  <main class="container mx-auto px-4 py-8">
+    <!-- 摸鱼指数卡片 -->
+    <div class="mb-8">
+      <div class="glass-effect rounded-xl shadow-lg p-6 card-hover">
+        <div class="text-center mb-4">
+          <h1 class="text-3xl font-bold text-primary mb-2">今日摸鱼指数</h1>
+          <div id="moyu-index" class="text-5xl font-extrabold text-secondary countdown"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- 天气信息 -->
+          <div class="glass-effect rounded-lg p-4 text-center">
+            <i class="fa fa-cloud text-2xl text-primary mb-2"></i>
+            <h3 class="text-lg font-semibold mb-1">当前天气</h3>
+            <p id="weather-info" class="text-sm">加载中...</p>
+          </div>
+          <!-- 下班倒计时 -->
+          <div class="glass-effect rounded-lg p-4 text-center">
+            <i class="fa fa-clock-o text-2xl text-primary mb-2"></i>
+            <h3 class="text-lg font-semibold mb-1">距离下班</h3>
+            <p id="off-work-countdown" class="text-sm">计算中...</p>
+            <!-- 工作进度条 -->
+            <div class="mt-3">
+              <div class="text-xs text-gray-500 mb-1 flex justify-between">
+                <span>今日工作进度</span>
+                <span id="progress-percentage">0%</span>
+              </div>
+              <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div id="work-progress-bar" class="h-full bg-primary rounded-full" style="width: 0%">
+                  <span class="sr-only" id="progress-text">0%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 周末倒计时 -->
+          <div class="glass-effect rounded-lg p-4 text-center">
+            <i class="fa fa-calendar text-2xl text-primary mb-2"></i>
+            <h3 class="text-lg font-semibold mb-1">农历信息</h3>
+            <p id="weekend-countdown" class="text-sm">加载中...</p>
+            <!-- 补充信息 -->
+            <p id="weekday-info" class="text-sm mt-2 text-gray-600">加载中...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 内容网格 -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- 左侧：新闻 -->
+      <div class="lg:col-span-2">
+        <div class="glass-effect rounded-xl shadow-lg p-6">
+          <h2 class="text-2xl font-bold text-primary mb-4 flex items-center">
+            <i class="fa fa-newspaper-o mr-2"></i>今日重点新闻
+          </h2>
+          <div id="news-container" class="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+            <!-- 新闻内容将通过JS动态加载 -->
+            <div class="flex justify-center items-center h-40">
+              <i class="fa fa-spinner fa-spin text-3xl text-primary"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧：信息卡片 -->
+      <div class="space-y-8">
+        <!-- 节假日倒计时 -->
+        <div class="glass-effect rounded-xl shadow-lg p-6 card-hover">
+          <h2 class="text-xl font-bold text-primary mb-4 flex items-center">
+            <i class="fa fa-calendar text-secondary mr-2"></i>节假日倒计时
+          </h2>
+          <div id="holiday-countdown" class="space-y-4">
+            <!-- 节假日内容将通过JS动态加载 -->
+            <div class="flex justify-center items-center h-40">
+              <i class="fa fa-spinner fa-spin text-3xl text-primary"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- 摸鱼真理 -->
+        <div class="glass-effect rounded-xl shadow-lg p-6 card-hover">
+          <h2 class="text-xl font-bold text-primary mb-4 flex items-center">
+            <i class="fa fa-lightbulb-o text-secondary mr-2"></i>摸鱼真理
+          </h2>
+          <div id="moyu-quotes" class="space-y-4">
+            <!-- 摸鱼真理将通过JS动态加载 -->
+          </div>
+        </div>
+
+        <!-- IP信息 -->
+        <div class="glass-effect rounded-xl shadow-lg p-6 card-hover">
+          <h2 class="text-xl font-bold text-primary mb-4 flex items-center">
+            <i class="fa fa-globe text-secondary mr-2"></i>IP信息
+          </h2>
+          <div id="ip-info" class="text-sm">
+            <!-- IP信息将通过JS动态加载 -->
+            <div class="flex justify-center items-center h-20">
+              <i class="fa fa-spinner fa-spin text-2xl text-primary"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="mt-12 py-6 glass-effect border-t border-gray-200">
+    <div class="container mx-auto px-4 text-center text-sm text-gray-600">
+      <p>适当的摸鱼可以提高工作效率。</p>
+      <p class="mt-2"><i class="fa fa-coffee"></i> 摸鱼有理，快乐工作</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // 初始化页面
+    document.addEventListener('DOMContentLoaded', function() {
+      // 更新当前时间
+      updateCurrentTime();
+      setInterval(updateCurrentTime, 1000);
+      
+      // 计算摸鱼指数
+      calculateMoyuIndex();
+      setInterval(calculateMoyuIndex, 60000);
+      
+      // 先获取IP信息，再获取天气信息
+      loadIpInfo().then(() => {
+        loadWeatherInfo();
+      });
+      
+      // 加载新闻
+      loadNews();
+      
+      // 更新倒计时
+      updateAllCountdowns();
+      setInterval(updateAllCountdowns, 60000);
+      
+      // 显示摸鱼真理
+      showMoyuQuotes();
+    });
+
+    // 更新当前时间
+    function updateCurrentTime() {
+      const now = new Date();
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+      document.getElementById('current-time').textContent = now.toLocaleString('zh-CN', options);
+    }
+
+    // 计算摸鱼指数
+    function calculateMoyuIndex() {
+      const now = new Date();
+      const hour = now.getHours();
+      const minute = now.getMinutes();
+      const day = now.getDay();
+      
+      // 基础指数 (0-100)
+      let index = 50;
+      
+      // 时间因素：下午和接近下班时间指数更高
+      if (hour >= 14 && hour < 18) {
+        index += 20;
+      } else if (hour >= 18) {
+        index += 30;
+      }
+      
+      // 周五和周末指数更高
+      if (day === 5) { // 周五
+        index += 25;
+      } else if (day === 0 || day === 6) { // 周末
+        index += 40;
+      }
+      
+      // 早上刚上班指数较低
+      if (hour >= 9 && hour < 10) {
+        index -= 20;
+      }
+      
+      // 确保指数在0-100之间
+      index = Math.max(0, Math.min(100, index));
+      
+      // 显示指数
+      const indexElement = document.getElementById('moyu-index');
+      indexElement.textContent = index + '%';
+      
+      // 根据指数设置颜色
+      if (index >= 80) {
+        indexElement.className = 'text-5xl font-extrabold text-secondary countdown';
+      } else if (index >= 50) {
+        indexElement.className = 'text-5xl font-extrabold text-yellow-500 countdown';
+      } else {
+        indexElement.className = 'text-5xl font-extrabold text-green-500 countdown';
+      }
+    }
+
+    // 加载天气信息
+    function loadWeatherInfo() {
+      // 从IP信息中获取省份和城市
+      const ipInfoElement = document.getElementById('ip-info');
+      const locationText = ipInfoElement.querySelector('div:nth-child(2)')?.textContent;
+      
+      let sheng = '四川'; // 默认省份
+      let place = '绵阳'; // 默认城市
+      
+      if (locationText) {
+        const locationMatch = locationText.match(/位置:\s*(.*?),\s*(.*?),/);
+        if (locationMatch) {
+          sheng = locationMatch[1];
+          place = locationMatch[2];
+        }
+      }
+      
+      // 使用后端代理服务（相对路径，支持容器化部署）
+      const weatherUrl = `/api/weather?sheng=${encodeURIComponent(sheng)}&place=${encodeURIComponent(place)}`;
+      
+      fetch(weatherUrl)
+        .then(response => response.json())
+        .then(weatherData => {
+          if (weatherData.code === 200) {
+            const nowInfo = weatherData.nowinfo;
+            const temp = Math.round(nowInfo.temperature);
+            const weather = weatherData.weather1;
+            const humidity = nowInfo.humidity;
+            const windSpeed = nowInfo.windSpeed;
+            const windDirection = nowInfo.windDirection;
+            
+            document.getElementById('weather-info').innerHTML = `
+              <div class="font-semibold">${weatherData.name}</div>
+              <div class="text-2xl font-bold my-1">${temp}°C</div>
+              <div>${weather}</div>
+              <div class="mt-1 text-xs">湿度: ${humidity}% | ${windDirection} ${windSpeed}m/s</div>
+            `;
+          } else {
+            document.getElementById('weather-info').innerHTML = `
+              <div class="font-semibold">${sheng} ${place}</div>
+              <div class="text-red-500">天气信息加载失败</div>
+            `;
+          }
+        })
+        .catch(error => {
+          console.error('获取天气信息失败:', error);
+          document.getElementById('weather-info').innerHTML = `
+            <div class="font-semibold">${sheng} ${place}</div>
+            <div class="text-red-500">天气信息加载失败</div>
+          `;
+        });
+    }
+
+    // 加载新闻
+    function loadNews() {
+      // 使用后端代理服务（相对路径，支持容器化部署）
+      const newsUrl = '/api/news';
+      const newsContainer = document.getElementById('news-container');
+      
+      fetch(newsUrl)
+        .then(response => response.json())
+        .then(newsData => {
+          if (newsData.code === 200 && newsData.data && newsData.data.length > 0) {
+            // 清空容器
+            newsContainer.innerHTML = '';
+            
+            // 添加新闻项
+            newsData.data.forEach(news => {
+              const newsItem = document.createElement('div');
+              newsItem.className = 'news-item glass-effect p-3 rounded-lg hover:shadow-md transition-all';
+              
+              // 计算热度显示
+              let hotText = news.hot;
+              if (parseInt(news.hot) >= 10000) {
+                hotText = (parseInt(news.hot) / 10000).toFixed(1) + '万';
+              }
+              
+              newsItem.innerHTML = `
+                <div class="font-medium mb-1 line-clamp-2">${news.title}</div>
+                <div class="flex justify-between text-xs text-gray-500">
+                  <span>热度: ${hotText}</span>
+                  <span>${formatNewsTime(newsData.time2)}</span>
+                </div>
+              `;
+              
+              // 添加点击跳转
+              if (news.url) {
+                newsItem.style.cursor = 'pointer';
+                newsItem.addEventListener('click', () => {
+                  window.open(news.url, '_blank');
+                });
+              }
+              
+              newsContainer.appendChild(newsItem);
+            });
+          } else {
+            // 如果API调用失败，显示模拟数据
+            showMockNews();
+          }
+        })
+        .catch(error => {
+          console.error('获取新闻失败:', error);
+          // 显示模拟数据
+          showMockNews();
+        });
+    }
+    
+    // 格式化新闻时间
+    function formatNewsTime(timeStr) {
+      const now = new Date();
+      const newsTime = new Date(timeStr);
+      const diffMinutes = Math.floor((now - newsTime) / (1000 * 60));
+      
+      if (diffMinutes < 1) {
+        return '刚刚';
+      } else if (diffMinutes < 60) {
+        return diffMinutes + '分钟前';
+      } else if (diffMinutes < 1440) {
+        return Math.floor(diffMinutes / 60) + '小时前';
+      } else {
+        return Math.floor(diffMinutes / 1440) + '天前';
+      }
+    }
+    
+    // 显示模拟新闻（备用）
+    function showMockNews() {
+      const newsContainer = document.getElementById('news-container');
+      
+      // 模拟新闻数据
+      const mockNews = [
+        { title: '国务院发布重要政策文件，影响多个行业发展方向', source: '新华社', time: '2小时前' },
+        { title: '最新科研突破：科学家成功研发新型可再生能源技术', source: '科技日报', time: '3小时前' },
+        { title: '全国多地迎来降温天气，北方地区将出现雨雪', source: '央视新闻', time: '4小时前' },
+        { title: '国际体育赛事：中国队在世界锦标赛中获得多项冠军', source: '人民日报', time: '5小时前' },
+        { title: '经济数据向好：第三季度GDP增长超预期', source: '经济参考报', time: '6小时前' },
+        { title: '教育改革新举措：多地推出中小学课后服务新政策', source: '中国教育报', time: '7小时前' },
+        { title: '医疗健康：最新发掘找到预防某疾病的新方法', source: '健康时报', time: '8小时前' },
+        { title: '交通出行：全国高铁网络进一步完善，新线路即将开通', source: '交通周刊', time: '9小时前' }
+      ];
+      
+      // 清空容器
+      newsContainer.innerHTML = '';
+      
+      // 添加新闻项
+      mockNews.forEach(news => {
+        const newsItem = document.createElement('div');
+        newsItem.className = 'news-item glass-effect p-3 rounded-lg hover:shadow-md transition-all';
+        newsItem.innerHTML = `
+          <div class="font-medium mb-1 line-clamp-2">${news.title}</div>
+          <div class="flex justify-between text-xs text-gray-500">
+            <span>${news.source}</span>
+            <span>${news.time}</span>
+          </div>
+        `;
+        newsContainer.appendChild(newsItem);
+      });
+    }
+
+    // 加载IP信息
+    function loadIpInfo() {
+      // 使用后端代理服务（相对路径，支持容器化部署）
+      const ipUrl = '/api/ip';
+      
+      return fetch(ipUrl)
+        .then(response => response.json())
+        .then(data => {
+          if (data.code === 200) {
+            const ipInfo = document.getElementById('ip-info');
+            ipInfo.innerHTML = `
+              <div class="mb-1"><strong>IP:</strong> ${data.ip}</div>
+              <div class="mb-1"><strong>位置:</strong> ${data.sheng}, ${data.shi}, ${data.qu}</div>
+              <div class="mb-1"><strong>运营商:</strong> ${data.isp}</div>
+              <div><strong>经纬度:</strong> ${data.lat}, ${data.lon}</div>
+            `;
+          } else {
+            document.getElementById('ip-info').textContent = 'IP信息加载失败';
+          }
+        })
+        .catch(error => {
+          console.error('获取IP信息失败:', error);
+          document.getElementById('ip-info').textContent = 'IP信息加载失败';
+        });
+    }
+
+    // 更新所有倒计时
+    function updateAllCountdowns() {
+      updateOffWorkCountdown();
+      updateWorkProgressBar(); // 添加工作进度条更新
+      updateWeekendCountdown();
+      updateHolidayCountdown();
+    }
+
+    // 下班倒计时
+    function updateOffWorkCountdown() {
+      const now = new Date();
+      const workEnd = new Date();
+      workEnd.setHours(18, 0, 0, 0); // 假设18:00下班
+      
+      // 如果当前时间已经过了下班时间，计算到明天下班的时间
+      if (now > workEnd) {
+        workEnd.setDate(workEnd.getDate() + 1);
+      }
+      
+      const diff = workEnd - now;
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      
+      document.getElementById('off-work-countdown').textContent = `${hours}小时${minutes}分钟`;
+    }
+
+    // 更新工作进度条
+    function updateWorkProgressBar() {
+      const now = new Date();
+      const startOfDay = new Date(now);
+      startOfDay.setHours(9, 0, 0, 0); // 假设9:00上班
+      const endOfDay = new Date(now);
+      endOfDay.setHours(18, 0, 0, 0); // 假设18:00下班
+      
+      let progress = 0;
+      
+      if (now >= endOfDay) {
+        progress = 100;
+      } else if (now >= startOfDay) {
+        const totalWorkTime = endOfDay - startOfDay;
+        const elapsedWorkTime = now - startOfDay;
+        progress = (elapsedWorkTime / totalWorkTime) * 100;
+      }
+      
+      const progressBar = document.getElementById('work-progress-bar');
+      const progressPercentage = document.getElementById('progress-percentage');
+      const progressText = document.getElementById('progress-text');
+      
+      if (progressBar) {
+        progressBar.style.width = progress + '%';
+      }
+      
+      if (progressPercentage) {
+        progressPercentage.textContent = Math.round(progress) + '%';
+      }
+      
+      if (progressText) {
+        progressText.textContent = Math.round(progress) + '%';
+      }
+    }
+
+    // 发工资日倒计时
+    function updateSalaryCountdown() {
+      const now = new Date();
+      let salaryDay = new Date(now.getFullYear(), now.getMonth(), 10); // 假设每月10号发工资
+      
+      // 如果本月工资已发，则计算到下个月的工资日
+      if (now.getDate() > 10) {
+        salaryDay.setMonth(salaryDay.getMonth() + 1);
+      }
+      
+      const diff = salaryDay - now;
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      
+      document.getElementById('salary-days').textContent = days;
+      document.getElementById('salary-hours').textContent = hours;
+      document.getElementById('salary-minutes').textContent = minutes;
+    }
+
+    // 农历信息显示
+    function updateWeekendCountdown() {
+      // 农历日期计算函数
+      function getLunarDate(date) {
+        const now = date || new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
+        const day = now.getDate();
+        
+        // 简化版农历计算，实际项目中可能需要更复杂的农历库
+        // 这里使用的是公历转农历的简化算法
+        const lunarYear = year;
+        
+        // 农历月份数组（包含闰月信息）
+        const lunarMonths = [
+          '正月', '二月', '三月', '四月', '五月', '六月',
+          '七月', '八月', '九月', '十月', '冬月', '腊月'
+        ];
+        
+        // 农历日期数组
+        const lunarDays = [
+          '初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
+          '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+          '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'
+        ];
+        
+        // 简化的农历转换（实际应用中应使用专业的农历库）
+        // 这里我们只是做一个简单的模拟，实际应用中应该使用更精确的算法或第三方库
+        const lunarMonthIndex = month - 1;
+        let lunarDayIndex = day - 1;
+        
+        // 处理特殊情况
+        if (lunarDayIndex >= lunarDays.length) {
+          lunarDayIndex = lunarDays.length - 1;
+        }
+        
+        return {
+          year: lunarYear,
+          month: lunarMonths[lunarMonthIndex],
+          day: lunarDays[lunarDayIndex]
+        };
+      }
+      
+      const now = new Date();
+      const lunarDate = getLunarDate(now);
+      
+      // 显示农历信息
+      document.getElementById('weekend-countdown').textContent = `${lunarDate.year}年${lunarDate.month}${lunarDate.day}`;
+      
+      // 显示星期信息
+      const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+      const weekday = weekdays[now.getDay()];
+      const month = now.getMonth() + 1;
+      const day = now.getDate();
+      document.getElementById('weekday-info').textContent = `${now.getFullYear()}年${month}月${day}日 ${weekday}`;
+    }
+
+    // 节假日倒计时
+    function updateHolidayCountdown() {
+      const now = new Date();
+      const year = now.getFullYear();
+      
+      // 定义主要节假日日期
+      const holidays = [
+        { name: '元旦', date: new Date(year, 0, 1) },
+        { name: '春节', date: new Date(year, 1, 10) }, // 假设春节在2月10日
+        { name: '清明节', date: new Date(year, 3, 4) },
+        { name: '劳动节', date: new Date(year, 4, 1) },
+        { name: '端午节', date: new Date(year, 5, 22) },
+        { name: '中秋节', date: new Date(year, 8, 17) },
+        { name: '国庆节', date: new Date(year, 9, 1) }
+      ];
+      
+      // 找到下一个节假日
+      let nextHoliday = null;
+      let minDays = Infinity;
+      
+      holidays.forEach(holiday => {
+        // 如果今年的节假日已过，则计算到明年的
+        if (holiday.date < now) {
+          holiday.date.setFullYear(year + 1);
+        }
+        
+        const days = Math.ceil((holiday.date - now) / (1000 * 60 * 60 * 24));
+        
+        if (days < minDays) {
+          minDays = days;
+          nextHoliday = holiday;
+        }
+      });
+      
+      // 显示结果
+      const holidayElement = document.getElementById('holiday-countdown');
+      holidayElement.innerHTML = `
+        <div class="text-center">
+          <div class="font-semibold mb-1">${nextHoliday.name}</div>
+          <div class="text-2xl font-bold text-secondary">${minDays}天</div>
+        </div>
+      `;
+    }
+
+    // 显示摸鱼真理
+    function showMoyuQuotes() {
+      const quotes = [
+        "摸鱼不是目的，而是为了更好地工作。",
+        "适当的摸鱼可以提高工作效率。",
+        "摸鱼是对生活的热爱，对工作的尊重。",
+        "会摸鱼的人，才会更好地生活。",
+        "摸鱼是一种态度，更是一种智慧。",
+        "摸鱼有度，工作有数。",
+        "摸鱼不是偷懒，而是思考。",
+        "摸鱼是为了寻找灵感，提高创造力。",
+        "工作诚可贵，摸鱼价更高。若为生活故，两者皆可抛。",
+        "今天不摸鱼，明天变咸鱼。",
+        "摸鱼是一门艺术，需要精心修炼。",
+        "摸鱼五分钟，工作两小时。"
+      ];
+      
+      const quotesContainer = document.getElementById('moyu-quotes');
+      
+      // 随机选择3条显示
+      const shuffledQuotes = [...quotes].sort(() => Math.random() - 0.5);
+      const selectedQuotes = shuffledQuotes.slice(0, 3);
+      
+      // 清空容器
+      quotesContainer.innerHTML = '';
+      
+      // 添加摸鱼真理
+      selectedQuotes.forEach(quote => {
+        const quoteElement = document.createElement('div');
+        quoteElement.className = 'moyu-quote p-3 border-l-4 border-primary bg-white bg-opacity-50 rounded-r-lg transition-all hover:shadow-md';
+        quoteElement.innerHTML = `
+          <i class="fa fa-quote-left text-primary text-opacity-50 mr-2"></i>
+          <span>${quote}</span>
+          <i class="fa fa-quote-right text-primary text-opacity-50 ml-2"></i>
+        `;
+        quotesContainer.appendChild(quoteElement);
+      });
+    }
+  </script>
+</body>
+</html>

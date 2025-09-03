@@ -1,0 +1,45 @@
+# 依赖目录
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# 环境变量文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 构建产物
+build
+dist
+dist-ssr
+*.local
+
+# 编辑器目录和文件
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# 测试覆盖率报告
+coverage
+*.lcov
+
+# 日志
+logs
+*.log
+
+# 前端文件（只复制index.html，其他不需要）
+!../index.html
+../*.html
+../*.css
+../*.js
