@@ -12,4 +12,4 @@ services:
       # 注意：真实的API_ID和API_KEY应该放在.env文件中，而不是docker-compose.yml中
     volumes:
       # 可选：如果需要从宿主机加载.env文件
-      - ./backend/.env:/app/.env:ro
+      - ./backend/.env:/app/backend/.env:ro

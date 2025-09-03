@@ -38,8 +38,6 @@ coverage
 logs
 *.log
 
-# 前端文件（只复制index.html，其他不需要）
-!../index.html
-../*.html
-../*.css
-../*.js
+# 前端文件（Docker构建时需要的文件）
+# 注意：Dockerfile中会明确指定需要复制的文件
+# 这里不需要特别排除前端文件，Dockerfile会控制复制哪些文件

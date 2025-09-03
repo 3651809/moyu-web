@@ -5,7 +5,22 @@ const cors = require('cors');
 const path = require('path');
 
 // 加载环境变量
-dotenv.config();
+// 为Docker环境添加特定的配置
+try {
+  // 首先尝试默认的.env位置（本地开发环境）
+  dotenv.config();
+  console.log('正在使用默认的.env文件');
+} catch (error) {
+  // 如果失败，尝试Docker容器中的路径
+  console.log('尝试加载Docker环境的.env文件');
+  dotenv.config({ path: path.join(__dirname, '.env') });
+}
+
+// 输出当前工作目录和__dirname用于调试
+console.log('当前工作目录:', process.cwd());
+console.log('__dirname:', __dirname);
+console.log('index.html路径:', path.join(__dirname, '..', 'index.html'));
+console.log('静态文件目录:', path.join(__dirname, '..'));
 
 // 初始化Express应用
 const app = express();
