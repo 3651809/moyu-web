@@ -1,0 +1,14 @@
+# 本地构建镜像专用配置
+# 使用方式: docker-compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+
+version: "3.9"
+services:
+  moyu-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # 可以在这里添加构建参数
+      args:
+        - NODE_ENV=production
+    # 强制重新构建镜像
+    # 注意：使用--build参数也会强制重新构建

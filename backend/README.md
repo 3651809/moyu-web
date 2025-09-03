@@ -34,26 +34,7 @@ npm run dev
 
 ### 使用Docker部署
 
-#### 方法一：直接使用Docker
-
-1. 构建Docker镜像
-```bash
-docker build -t moyu-api-proxy .
-```
-
-2. 运行Docker容器
-```bash
-docker run -p 3636:3636 --env-file .env --name moyu-api-proxy -d moyu-api-proxy
-```
-
-#### 方法二：使用Docker Compose
-
-1. 创建 `.env` 文件（从 `.env.example` 复制）
-
-2. 启动服务
-```bash
-docker-compose up -d
-```
+查看文件DEPLOYMENT.md，了解如何使用Docker和Docker Compose部署。
 
 ## API路由
 

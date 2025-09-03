@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  moyu-web:
+    build: .
+    image: moyu-web:latest
+    container_name: moyu-web
+    ports:
+      - "3636:3636"
+    restart: unless-stopped
+    environment:
+      - PORT=3636
+      # 注意：真实的API_ID和API_KEY应该放在.env文件中，而不是docker-compose.yml中
+    volumes:
+      # 可选：如果需要从宿主机加载.env文件
+      - ./backend/.env:/app/.env:ro
