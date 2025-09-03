@@ -6,15 +6,10 @@ const path = require('path');
 
 // 加载环境变量
 // 为Docker环境添加特定的配置
-try {
-  // 首先尝试默认的.env位置（本地开发环境）
-  dotenv.config();
-  console.log('正在使用默认的.env文件');
-} catch (error) {
-  // 如果失败，尝试Docker容器中的路径
-  console.log('尝试加载Docker环境的.env文件');
-  dotenv.config({ path: path.join(__dirname, '.env') });
-}
+// 直接使用完整路径以确保读取到正确的.env文件
+const envPath = path.join(__dirname, '.env');
+console.log('尝试加载.env文件路径:', envPath);
+dotenv.config({ path: envPath });
 
 // 输出当前工作目录和__dirname用于调试
 console.log('当前工作目录:', process.cwd());

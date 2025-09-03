@@ -45,7 +45,7 @@
 
 2. 运行容器：
    ```bash
-   docker run -d --name moyu-web -p 3636:3636 -v ./backend/.env:/app/.env:ro --restart unless-stopped moyu-web:latest
+   docker run -d --name moyu-web -p 3636:3636 -v ./backend/.env:/app/backend/.env:ro --restart unless-stopped moyu-web:latest
    ```
 
 ## 从云仓库拉取镜像并运行
@@ -70,7 +70,7 @@
          - "3636:3636"
        restart: unless-stopped
        volumes:
-         - ./backend/.env:/app/.env:ro
+         - ./backend/.env:/app/backend/.env:ro
    ```
 
 2. 执行以下命令拉取并运行：
@@ -89,9 +89,9 @@
 
 2. 运行容器：
    ```bash
-   docker run -d --name moyu-web -p 3636:3636 -v ./backend/.env:/app/.env:ro --restart unless-stopped docker.io/3651809/moyu-web:latest
+   docker run -d --name moyu-web -p 3636:3636 -v ./backend/.env:/app/backend/.env:ro --restart unless-stopped docker.io/3651809/moyu-web:latest
    # 或者简化为
-   # docker run -d --name moyu-web -p 3636:3636 -v ./backend/.env:/app/.env:ro --restart unless-stopped 3651809/moyu-web:latest
+   # docker run -d --name moyu-web -p 3636:3636 -v ./backend/.env:/app/backend/.env:ro --restart unless-stopped 3651809/moyu-web:latest
    ```
 
 ## 配置说明
