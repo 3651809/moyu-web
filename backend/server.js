@@ -164,6 +164,39 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
+// 农历日期API接口
+app.get('/api/lunar-date', async (req, res) => {
+  try {
+    const { nian, yue, ri } = req.query;
+    
+    // 获取当前日期作为默认值
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    const currentDay = now.getDate();
+    
+    // 如果未提供参数，使用当前日期
+    const year = nian || currentYear;
+    const month = yue || currentMonth;
+    const day = ri || currentDay;
+    
+    console.log('请求农历日期API:', { year, month, day });
+    
+    // 使用用户提供的接口盒子API
+    // 注意：这里使用了用户提供的固定id和key参数
+    const response = await axios.get(
+      `https://cn.apihz.cn/api/time/getzdday.php?id=10007808&key=14d990cda05710b66d3d795278fee56a&nian=${year}&yue=${month}&ri=${day}`
+    );
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error('获取农历日期失败:', error.message);
+    console.error('错误详情:', error.response?.data || error);
+    console.error('请求URL:', `https://cn.apihz.cn/api/time/getzdday.php?id=10007808&key=14d990cda05710b66d3d795278fee56a&nian=${req.query.nian || 'current'}&yue=${req.query.yue || 'current'}&ri=${req.query.ri || 'current'}`);
+    res.status(500).json({ code: 500, message: '获取农历日期失败', error: error.message });
+  }
+});
+
 // 启动服务器
 app.listen(PORT, () => {
   console.log(`服务器运行在 http://localhost:${PORT}`);
@@ -172,5 +205,6 @@ app.listen(PORT, () => {
   console.log('  GET /api/news - 获取新闻信息');
   console.log('  GET /api/ip - 获取IP信息');
   console.log('  GET /api/weather?sheng=省份&place=城市 - 获取天气信息');
+  console.log('  GET /api/lunar-date?nian=年份&yue=月份&ri=日期 - 获取农历日期信息（参数可选，默认当前日期）');
   console.log('  GET /health - 健康检查');
 });
