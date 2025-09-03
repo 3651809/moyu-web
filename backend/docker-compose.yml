@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  moyu-api:
+  moyu-web:
     build: .
     ports:
       - "3636:3636"
@@ -13,4 +13,4 @@ services:
       - API_KEY=${API_KEY}
       - PORT=3636
     restart: unless-stopped
-    container_name: moyu-api-proxy
+    container_name: moyu-web

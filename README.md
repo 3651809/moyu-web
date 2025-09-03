@@ -88,6 +88,8 @@ cp .env.example .env
 在项目根目录下运行：
 
 ```bash
+git clone '代码地址'
+cd backend
 docker-compose up -d --build
 ```
 
@@ -127,6 +129,8 @@ npm run dev
 ### 生产环境
 1. 使用Docker Compose（单容器部署）
 ```bash
+git clone '代码地址'
+cd backend
 docker-compose up -d --build
 ```
 
