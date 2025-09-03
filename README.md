@@ -12,17 +12,24 @@
 ## 项目结构
 
 ```
-moyu/
-├── index.html       # 前端界面 (后端直接读取)
-├── README.md        # 项目说明文档
-└── backend/         # 后端API代理服务
-    ├── server.js           # 服务器主文件
-    ├── package.json        # 项目依赖
-    ├── .env.example        # 环境变量模板
-    ├── Dockerfile          # Docker构建文件
-    ├── .dockerignore       # Docker忽略文件
-    ├── docker-compose.yml  # Docker Compose配置
-    └── README.md           # 后端服务文档
+moyu-web/
+├── index.html           # 前端界面 (后端直接读取)
+├── moyu.html            # 纯前端版本（不推荐，API密钥会暴露）
+├── README.md            # 项目说明文档
+├── DEPLOYMENT.md        # Docker部署详细指南
+├── PUSH_TO_DOCKERHUB.md # Docker镜像推送指南
+├── Dockerfile           # Docker构建文件
+├── .dockerignore        # Docker忽略文件
+├── docker-compose.yml   # Docker Compose配置
+├── docker-compose.build.yml # 专用构建配置
+├── start-docker.sh      # Linux/Mac启动脚本
+├── start-docker.bat     # Windows启动脚本
+└── backend/             # 后端API代理服务
+    ├── server.js        # 服务器主文件
+    ├── package.json     # 项目依赖
+    ├── .env             # 环境变量文件（需自行创建）
+    ├── .env.example     # 环境变量模板
+    └── README.md        # 后端服务文档
 ```
 
 ## 安全提示与部署建议
